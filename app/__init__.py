@@ -1,7 +1,13 @@
 # Create application object as instance of class Flask 
 
 from flask import Flask
+from config import Config
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 app = Flask(__name__) # location is used as name
+app.config.from_object(Config)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
-from app import routes # workaround for circular imports
+from app import routes, models # workaround for circular imports

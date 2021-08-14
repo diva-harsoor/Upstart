@@ -1,0 +1,16 @@
+<!doctype html>
+<! Base template>
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - Upstart</title>
+      {% else %}
+      <title>Welcome to Upstart</title>
+      {% endif %}
+    </head>
+    <body>
+        <div>Upstart: <a href="/index">Home</a></div>
+        <hr>
+        {% block content %}{% endblock %}
+    </body>
+</html>
