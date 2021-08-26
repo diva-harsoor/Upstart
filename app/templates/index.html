@@ -4,4 +4,7 @@
 
 {% block content %}
 	<h1>HTML placeholder</h1>
+	{% for user in users %}
+	<div><p>{{ user.org_name }}'s purpose: {{ user.org_purpose }}</p></div>
+	{% endfor %}
 {% endblock %}

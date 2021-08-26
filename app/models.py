@@ -3,7 +3,13 @@
 # Source for many-to-many relationships: https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
 
 from app import db
-from enum import Enum
+
+# helper table for User-Category relationship
+# not a model; rather, an actual table
+categories = db.Table('categories',
+	db.Column('category_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+	db.Column('user_id', db.Integer, db.ForeignKey('category.id'), primary_key=True)
+)
 
 
 class User(db.Model):
@@ -15,6 +21,9 @@ class User(db.Model):
 	is_start_up = db.Column(db.Boolean, index=True) 
 	location = db.Column(db.String(70), index=True) # city for start up, school for student group
 	claimed = db.Column(db.Boolean)
+	categories = db.relationship(
+		'Category', secondary=categories, lazy='joined',
+		backref=db.backref('users', lazy='joined'))
 
 
 	def __repr__(self):
@@ -23,14 +32,20 @@ class User(db.Model):
 		else:
 			return "<StudentGroup {} at {}".format(self.org_name, self.location)
 
-# helper table for User-Category relationship
-# not a model; rather, an actual table
-categories = db.Table('categories',
-	db.Column('category_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-	db.Column('user_id', db.Integer, db.ForeignKey('category.id'), primary_key=True)
-)
+	def add_category(self, category):
+		if not category in self.categories:
+			self.categories.append(category)
+
+	def remove_category(self, category):
+		if category in self.categories:
+			self.categories.remove(category)
+
 
 class Category(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
+	name = db.Column(db.String(70), index=True)
+
+	def __repr__(self):
+		return "<Category {}>".format(self.name)
 
 
