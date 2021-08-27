@@ -2,7 +2,10 @@
 # Source for inheritance: https://hmajid2301.medium.com/implementing-model-class-inheritance-in-sqlalchemy-ad4f388a31fc
 # Source for many-to-many relationships: https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
 
-from app import db
+from app import db, login
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 # helper table for User-Category relationship
 # not a model; rather, an actual table
@@ -12,7 +15,7 @@ categories = db.Table('categories',
 )
 
 
-class Organization(db.Model):
+class Organization(db.Model, UserMixin):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(70), index=True, unique=True)
 	purpose = db.Column(db.String(500))
@@ -32,6 +35,12 @@ class Organization(db.Model):
 		else:
 			return "<StudentGroup {} at {}".format(self.name, self.location)
 
+	def set_password(self, password):
+		self.password_hash = generate_password_hash(password)
+
+	def check_password(self, password):
+		return check_password_hash(self.password_hash, password)
+
 	def add_category(self, category):
 		if not category in self.categories:
 			self.categories.append(category)
@@ -39,6 +48,11 @@ class Organization(db.Model):
 	def remove_category(self, category):
 		if category in self.categories:
 			self.categories.remove(category)
+
+
+@login.user_loader
+def load_user(id):
+	return Organization.query.get(int(id))
 
 
 class Category(db.Model):
